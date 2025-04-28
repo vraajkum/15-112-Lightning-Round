@@ -2,3 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Created directories
+full/
+trimmed/
+frames/
+
+# CSV Files
+*.csv
