@@ -17,16 +17,21 @@ Usage:
   (ID, Project Name, Link, Start Time, End Time)
 '''
 
-import argparse
-from dl_trim import downloadTrim
+import argparse, os
+from dlTrim import downloadTrim
 from frame import makeFrames
 
-def main(csvPath):
-    downloadTrim(csvPath)
-    makeFrames(csvPath)
+def main(csvPath, debug=False):
+  terminalSize = os.get_terminal_size().columns
+  print('-' * terminalSize)
+  downloadTrim(csvPath, debug)
+  print('-' * terminalSize)
+  makeFrames(csvPath)
+  print('-' * terminalSize)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('csvPath', type=str)
-    args = parser.parse_args()
-    main(args.csvPath)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('csvPath', type=str, help='path to CSV file')
+  parser.add_argument('--debug', action='store_true', help='prints debug information')
+  args = parser.parse_args()
+  main(args.csvPath, args.debug)

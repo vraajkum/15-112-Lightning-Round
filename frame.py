@@ -12,57 +12,47 @@ Usage:
   see main.py
 '''
 
-import csv
-import os
-from PIL import Image, ImageDraw, ImageFont, ImageColor
-
-OUTPUT_DIR = 'frames'
-WIDTH = 1920
-HEIGHT = 1080
-ASSET_DIR = 'assets'
-OUTPUT_FORMAT = "png"
-
-DRAGON = Image.open(os.path.join(ASSET_DIR, 'dragon.png'))
-FONT_PATH = os.path.join(ASSET_DIR, 'Gobold Bold Italic.otf')
-FONT = ImageFont.truetype(FONT_PATH, size = 96) 
-SMALL_FONT = ImageFont.truetype(FONT_PATH, size = 42)
-COLOR = (31, 82, 143)
-LETTER_WIDTH = 55
-MAX_WIDTH = WIDTH * 0.75 - 150
+import config
+import csv, os
+from PIL import Image, ImageDraw, ImageFont
 
 def writeFrame(id, title):
     title = title.lower()
+    dragon = Image.open(os.path.join(config.assetDir, 'dragon.png'))
+    fontPath = os.path.join(config.assetDir, 'Gobold Bold Italic.otf')
+    font = ImageFont.truetype(fontPath, size = 96) 
+    smallFont = ImageFont.truetype(fontPath, size = 42)
+    color = (31, 82, 143)
+    maxWidth = config.width * 0.75 - 150
 
-    im = Image.new("RGBA", (WIDTH,HEIGHT))
-    draw = ImageDraw.Draw(im, "RGBA")
-    width = draw.textlength(title, font=FONT)
-    if width > MAX_WIDTH:
-        print(f'%{title} is too long, frame not created.')
+    im = Image.new('RGBA', (config.width, config.height))
+    draw = ImageDraw.Draw(im, 'RGBA')
+    width = draw.textlength(title, font=font)
+    if width > maxWidth:
+        print(f'''"{title}" is too long, frame not created.''')
         return False
     draw.rectangle([0, 800, 150+width+50, 930], fill = "white", outline = (0,0,0,0), width = 0)
-    draw.text((165, 800), title, font=FONT, fill=COLOR)
-    draw.text((0, 750), "112 S25", font=SMALL_FONT, fill=COLOR)
-    draw.rectangle([0,800, 150, 930], fill=COLOR)
-    im.paste(DRAGON, box = (15, 815))
+    draw.text((165, 800), title, font=font, fill=color)
+    draw.text((0, 750), config.currSem, font=smallFont, fill=color)
+    draw.rectangle([0,800, 150, 930], fill=color)
+    im.paste(dragon, box = (15, 815))
     im = im.resize((1198, 720))
 
-    outPath = os.path.join(OUTPUT_DIR, f'{id}.{OUTPUT_FORMAT}')
-    im.save(outPath, OUTPUT_FORMAT)
+    outPath = os.path.join(config.frameDir, f'{id}.{config.imageFormat}')
+    im.save(outPath, config.imageFormat)
     return True
 
 def makeFrames(csvPath):
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-    terminalSize = os.get_terminal_size().columns
+    if not os.path.exists(config.frameDir):
+        os.makedirs(config.frameDir)
 
     with open(csvPath, 'r') as csvFile:
         csvReader = csv.reader(csvFile)
-        numFailed = 0
+        failed = []
         total = 0
 
-        print('-' * terminalSize)
         print('Creating frames:')
-        print('-' * terminalSize)
+        print()
 
         for line in csvReader:
             id, title, _, _, _ = line
@@ -71,10 +61,11 @@ def makeFrames(csvPath):
                 print(f'Frame succeeded: {id}')
             else:
                 print(f'Frame failed: {id}')
-                numFailed += 1
+                failed.append(id)
             total += 1
 
-    print('-' * terminalSize)
+    print()
     print(f'Total: {total}')
-    print(f'Failed: {numFailed}')
-    print('-' * terminalSize)
+    print(f'Failed: {len(failed)}')
+    if len(failed) > 0:
+        print(f'Failed IDs: {', '.join(failed)}')
