@@ -14,4 +14,4 @@ videoFormat = 'mp4'
 imageFormat = 'png'
 
 # Course-Related Stuff
-currSem = '112 S25'
+currSem = 'S25'

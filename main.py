@@ -17,14 +17,25 @@ vraajkum,coolTP,https://www.youtube.com/watch?v=dQw4w9WgXcQ,1:12,1:16
 
 import config
 from clips import createClips
+from video import makeVideo
 import argparse, os, csv
 
 def main(csvPath, debug):
     terminalSize = os.get_terminal_size().columns
     createMissingDirs()
 
+    print('-' * terminalSize)
+    print('Creating Clips')
     print(('-' * terminalSize) + '\n')
-    createClips(csvPath, debug)
+    clipSuccess = createClips(csvPath, debug)
+
+    print('-' * terminalSize)
+    print('Creating Video')
+    print(('-' * terminalSize) + '\n')
+    if not clipSuccess:
+        print('Not all clips created, exiting')
+        return
+    makeVideo()
     print('-' * terminalSize)
 
 def createMissingDirs():
@@ -37,6 +48,7 @@ def createMissingDirs():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('csvPath', type=str, help='path to CSV file')
-    parser.add_argument('--debug', action='store_true', help='prints debug information')
+    parser.add_argument('--debug', action='store_true',
+                        help='prints debug information')
     args = parser.parse_args()
     main(args.csvPath, args.debug)

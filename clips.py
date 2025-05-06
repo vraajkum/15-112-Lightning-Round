@@ -1,5 +1,6 @@
 import config
-import os, csv, sys, subprocess
+from utils import mmssToSeconds, runCommand
+import os, csv, sys
 from PIL import Image, ImageDraw, ImageFont
 
 def createClips(csvPath, debug):
@@ -12,48 +13,58 @@ def createClips(csvPath, debug):
             print()
 
     displayFailureInfo(failureInfo)
+    return len(failureInfo) == 0
 
 def processID(info, failureInfo, debug):
     id, title, url, start, end = info
     print(f'ID: {id}')
 
-    print('Downloading...')
+    vidFormat = config.videoFormat
+    outPath = os.path.join(config.overlaidVideoDir, f'{id}.{vidFormat}')
+    if os.path.isfile(outPath):
+        print('Overlaid file found')
+        return
+
+    print('Downloading... ', end='', flush=True)
     if download(id, url, debug):
-        print('\tSucceeded')
+        print('Succeeded')
     else:
-        print('\tFailed')
-        failureInfo.get('Download', []).append(id)
+        print('Failed')
+        failureInfo['Download'] = failureInfo.get('Download', []) + [id]
         return
 
-    print('Trimming...')
+    print('Trimming... ', end='', flush=True)
     if trim(id, start, end, debug):
-        print('\tSucceeded')
+        print('Succeeded')
     else:
-        print("\tFailed")
-        failureInfo.get('Trim', []).append(id)
+        print("Failed")
+        failureInfo['Trim'] = failureInfo.get('Trim', []) + [id]
         return
 
-    print('Creating frame...')
-    if createFrame(id, title):
-        print('\tSucceeded')
+    print('Creating frame... ', end='', flush=True)
+    if createFrame(id, title, debug):
+        print('Succeeded')
     else:
-        print("\tFailed")
-        failureInfo.get('Frame', []).append(id)
+        print("Failed")
+        failureInfo['Frame'] = failureInfo.get('Frame', []) + [id]
         return
 
-    print('Overlaying...')
+    print('Overlaying... ', end='', flush=True)
     if overlay(id, debug):
-        print('\tSucceeded')
+        print('Succeeded')
     else:
-        print("\tFailed")
-        failureInfo.get('Overlay', []).append(id)
+        print("Failed")
+        failureInfo['Overlay'] = failureInfo.get('Overlay', []) + [id]
         return
     
 def displayFailureInfo(failureInfo):
     if len(failureInfo) == 0:
         print('No failures!')
     else:
-       for failureType in failureInfo:
+       print('Failures:')
+       for failureType in ['Download', 'Trim', 'Frame', 'Overlay']:
+           if failureType not in failureInfo:
+               continue
            failures = failureInfo[failureType]
            print(f'{failureType}: {', '.join(failures)}') 
 
@@ -66,16 +77,7 @@ def download(id, url, debug):
     binary = f'{sys.executable} -m yt_dlp'
     cmd = binary + f' -f {format} -o {outPath} {url} --no-check-certificate'
 
-    try:
-        if debug:
-            print(cmd)
-            subprocess.run(cmd.split(), shell=True, check=True)
-        else:
-            subprocess.run(cmd.split(), shell=True, check=True,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        return True
-    except:
-        return False
+    return runCommand(cmd, debug)
 
 def trim(id, start, end, debug):
     format = config.videoFormat
@@ -88,27 +90,12 @@ def trim(id, start, end, debug):
 
     startTime, endTime = mmssToSeconds(start), mmssToSeconds(end)
     w, h = config.width, config.height
-    command = f'ffmpeg -i {inPath} -ss {startTime} -to {endTime} -an '
-    command += f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}'
-    try:
-        if debug:
-            print(command)
-            subprocess.run(command.split(), shell=True, check=True)
-        else:
-            subprocess.run(command.split(), shell=True, check=True,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        return True
-    except:
-        return False
+    cmd = f'ffmpeg -i {inPath} -ss {startTime} -to {endTime} -an '
+    cmd += f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}'
     
-def mmssToSeconds(s):
-        seconds = 0
-        for num in s.split(":"):
-            seconds *= 60
-            seconds += int(num)
-        return seconds
+    return runCommand(cmd, debug)
 
-def createFrame(id, title):
+def createFrame(id, title, debug):
     title = title.lower()
     dragon = Image.open(os.path.join(config.assetDir, 'dragon.png'))
     fontPath = os.path.join(config.assetDir, 'Gobold Bold Italic.otf')
@@ -117,18 +104,20 @@ def createFrame(id, title):
     color = (31, 82, 143)
     maxWidth = config.width * 0.75 - 150
 
-    im = Image.new('RGBA', (config.width, config.height))
+    im = Image.new('RGBA', (1920, 1080))
     draw = ImageDraw.Draw(im, 'RGBA')
     width = draw.textlength(title, font=font)
     if width > maxWidth:
-        print(f'''"{title}" is too long, frame not created.''')
+        if debug:
+            print(f'''"{title}" is too long, frame not created.''')
         return False
     draw.rectangle([0, 800, 150+width+50, 930], fill = "white",
                    outline = (0,0,0,0), width = 0)
     draw.text((165, 800), title, font=font, fill=color)
-    draw.text((0, 750), config.currSem, font=smallFont, fill=color)
+    draw.text((0, 750), '112 ' + config.currSem, font=smallFont, fill=color)
     draw.rectangle([0,800, 150, 930], fill=color)
     im.paste(dragon, box = (15, 815))
+    im = Image.resize((config.width, config.height))
 
     outPath = os.path.join(config.frameDir, f'{id}.{config.imageFormat}')
     im.save(outPath, config.imageFormat)
@@ -141,20 +130,12 @@ def overlay(id, debug):
     framePath = os.path.join(config.frameDir, f'{id}.{imgFormat}')
     clipPath = os.path.join(config.trimmedVideoDir, f'{id}.{vidFormat}')
     outPath = os.path.join(config.overlaidVideoDir, f'{id}.{vidFormat}')
-    if not os.path.isfile(framePath) or not os.path.isfile(clipPath):
-        return False
     if os.path.isfile(outPath):
         return True
-
-    command = f'ffmpeg -i {clipPath} -i {framePath} '
-    command += f'-filter_complex [0][1]overlay=x=0:y=0 {outPath}'
-
-    try:
-        if debug:
-            subprocess.run(command.split(), shell=True, check=True)
-        else:
-            subprocess.run(command.split(), shell=True, check=True,
-                           stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        return True
-    except:
+    if not os.path.isfile(framePath) or not os.path.isfile(clipPath):
         return False
+
+    cmd = f'ffmpeg -i {clipPath} -i {framePath} '
+    cmd += f'-filter_complex [0][1]overlay=x=0:y=0 {outPath}'
+
+    return runCommand(cmd, debug)
