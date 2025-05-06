@@ -35,12 +35,12 @@ def main(csvPath, debug):
     if not clipSuccess:
         print('Not all clips created, exiting')
         return
-    makeVideo()
+    makeVideo(debug)
     print('-' * terminalSize)
 
 def createMissingDirs():
     dirs = [config.fullVideoDir, config.trimmedVideoDir, config.frameDir,
-            config.overlaidVideoDir]
+            config.overlaidVideoDir, config.finalDir]
     for dir in dirs:
         if not os.path.exists(dir):
             os.makedirs(dir)

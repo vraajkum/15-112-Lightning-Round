@@ -1,4 +1,4 @@
-# Clip Dimensions
+# Video Dimensions
 width = 1920
 height = 1080
 
@@ -8,6 +8,7 @@ fullVideoDir = 'full'
 trimmedVideoDir = 'trimmed'
 overlaidVideoDir = 'overlaid'
 frameDir = 'frames'
+finalDir = 'final'
 
 # Formats
 videoFormat = 'mp4'

@@ -8,6 +8,7 @@ full/
 trimmed/
 frames/
 overlaid/
+final/
 
 # CSV Files
 *.csv

@@ -88,9 +88,8 @@ def trim(id, start, end, debug):
     if os.path.isfile(outPath):
         return True
 
-    startTime, endTime = mmssToSeconds(start), mmssToSeconds(end)
     w, h = config.width, config.height
-    cmd = f'ffmpeg -i {inPath} -ss {startTime} -to {endTime} -an '
+    cmd = f'ffmpeg -an -ss {start} -to {end} -i {inPath} '
     cmd += f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}'
     
     return runCommand(cmd, debug)
@@ -117,7 +116,7 @@ def createFrame(id, title, debug):
     draw.text((0, 750), '112 ' + config.currSem, font=smallFont, fill=color)
     draw.rectangle([0,800, 150, 930], fill=color)
     im.paste(dragon, box = (15, 815))
-    im = Image.resize((config.width, config.height))
+    im = im.resize((config.width, config.height))
 
     outPath = os.path.join(config.frameDir, f'{id}.{config.imageFormat}')
     im.save(outPath, config.imageFormat)
