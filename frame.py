@@ -36,7 +36,6 @@ def writeFrame(id, title):
     draw.text((0, 750), config.currSem, font=smallFont, fill=color)
     draw.rectangle([0,800, 150, 930], fill=color)
     im.paste(dragon, box = (15, 815))
-    im = im.resize((1198, 720))
 
     outPath = os.path.join(config.frameDir, f'{id}.{config.imageFormat}')
     im.save(outPath, config.imageFormat)

@@ -6,6 +6,7 @@ height = 1080
 assetDir = 'assets'
 fullVideoDir = 'full'
 trimmedVideoDir = 'trimmed'
+overlayVideoDir = 'overlay'
 frameDir = 'frames'
 
 # Formats

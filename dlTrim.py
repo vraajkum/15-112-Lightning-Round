@@ -15,19 +15,19 @@ import config
 import csv, os, sys, subprocess
 
 def download(id, url, debug):
-    format = config.videoFormat
-    outPath = os.path.join(config.fullVideoDir, f'{id}.{format}')
+    outPath = os.path.join(config.fullVideoDir, f'{id}.{config.videoFormat}')
     if os.path.isfile(outPath):
         return True
 
     binary = f'{sys.executable} -m yt_dlp'
-    command = binary + f' -f {format} -o {outPath} {url} --no-check-certificate'
+    cmd = binary + f' -f {config.videoFormat} -o {outPath} {url} --no-check-certificate'
 
     try:
         if debug:
-            subprocess.run(command.split(), shell=True, check=True)
+            print(cmd)
+            subprocess.run(cmd.split(), shell=True, check=True)
         else:
-            subprocess.run(command.split(), shell=True, check=True,
+            subprocess.run(cmd.split(), shell=True, check=True,
                            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         return True
     except:
@@ -50,11 +50,11 @@ def trim(id, start, end, debug):
 
     startTime = mmssToSeconds(start)
     endTime = mmssToSeconds(end)
-    command = f"ffmpeg -i {inPath} -ss {startTime} -to {endTime}-an {outPath}"
-    command += f'''-vf scale="{config.width}:{config.height}"'''
-
+    command = f'''ffmpeg -i {inPath} -ss {startTime} -to {endTime} -an '''
+    command += f'''-vf scale={config.width}:{config.height},pad={config.width}:{config.height}:(ow-iw)/2:(oh-ih)/2 {outPath}'''
     try:
         if debug:
+            print(command)
             subprocess.run(command.split(), shell=True, check=True)
         else:
             subprocess.run(command.split(), shell=True, check=True,

@@ -20,6 +20,7 @@ Usage:
 import argparse, os
 from dlTrim import downloadTrim
 from frame import makeFrames
+from combine import overlayClips
 
 def main(csvPath, debug=False):
   terminalSize = os.get_terminal_size().columns
@@ -27,6 +28,8 @@ def main(csvPath, debug=False):
   downloadTrim(csvPath, debug)
   print('-' * terminalSize)
   makeFrames(csvPath)
+  print('-' * terminalSize)
+  overlayClips(csvPath, debug)
   print('-' * terminalSize)
 
 if __name__ == '__main__':

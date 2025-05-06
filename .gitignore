@@ -7,6 +7,7 @@ __pycache__/
 full/
 trimmed/
 frames/
+overlay/
 
 # CSV Files
 *.csv
