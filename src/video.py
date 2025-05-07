@@ -1,7 +1,13 @@
-import config
-from utils import runCommand
+################################################################################
+# Combines clips into final video
+################################################################################
+
+import src.config as config
+from src.utils import runCommand
 import os
 from PIL import Image, ImageDraw, ImageFont
+
+################################################################################
 
 def makeVideo(debug):
     print('Creating Title Image...\t', end='', flush=True)
@@ -28,6 +34,8 @@ def makeVideo(debug):
     else:
         print('Failed')
 
+################################################################################
+
 def createTitleImage():
     bgPath = os.path.join(config.assetDir, 'title-bg.png')
     outPath = os.path.join(config.finalDir, f'title.{config.imageFormat}')
@@ -53,31 +61,41 @@ def makeTitleClip(debug):
     if os.path.exists(outPath):
         return True
     
-    cmd = (f'ffmpeg -i {inPath} -r 30 -t 3 '
+    # specifies length of title (in seconds)
+    titleLength = 3
+
+    # Note: -pix_fmt yuv420p fixes a weird bug with Windows
+    cmd = (f'ffmpeg -i {inPath} -r {config.fps} -t {titleLength} '
            f'-pix_fmt yuv420p -vf loop=-1:1 {outPath}')
     return runCommand(cmd, debug)
 
+################################################################################
+
 def combineClips(debug):
     textPath = os.path.join(config.finalDir, f'clipList.txt')
-    makeClipList()
+    makeClipList(textPath)
 
     outPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
     if os.path.exists(outPath):
         return True
-
+    
+    # -safe 0 fixes a weird issue with the paths
+    # -c copy can be omitted but speeds things up
     cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -r 30 -c copy {outPath}'
     return runCommand(cmd, debug)
 
-def makeClipList():
-    textPath = os.path.join(config.finalDir, f'clipList.txt')
+def makeClipList(path):
     titlePath = f'title.{config.videoFormat}'
-    with open(textPath, 'w') as f:
+    with open(path, 'w') as f:
         f.write(f"file '{titlePath}'\n")
         for file in os.listdir(config.overlaidVideoDir):
             path = os.path.join(config.overlaidVideoDir, file)
             relativePath = os.path.relpath(path, config.finalDir)
             f.write(f"file '{relativePath}'\n")
 
+################################################################################
+
+# Note: This might mess up the ending of the video
 def addMusic(debug):
     musicPath = os.path.join(config.assetDir, f'music.mp3')
     inPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
@@ -86,8 +104,10 @@ def addMusic(debug):
         return False
     if os.path.exists(outPath):
         return True
-
+    
     cmd = (f'ffmpeg -i {inPath} '
            f'-stream_loop -1 -i {musicPath} '
            f'-shortest {outPath}')
     return runCommand(cmd, debug)
+
+################################################################################

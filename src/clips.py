@@ -1,7 +1,13 @@
-import config
-from utils import runCommand
+################################################################################
+# Creates the clips for each project
+################################################################################
+
+import src.config as config
+from src.utils import runCommand
 import os, csv, sys
 from PIL import Image, ImageDraw, ImageFont
+
+################################################################################
 
 def createClips(csvPath, debug):
     with open(csvPath, 'r') as csvFile:
@@ -62,6 +68,9 @@ def displayFailureInfo(failureInfo):
            failures = failureInfo[failureType]
            print(f'{failureType}: {', '.join(failures)}') 
 
+################################################################################
+
+# Created by Qiuwen "Owen" Fan and Ben Owad
 def download(id, url, debug):
     format = config.videoFormat
     outPath = os.path.join(config.fullVideoDir, f'{id}.{format}')
@@ -73,6 +82,9 @@ def download(id, url, debug):
 
     return runCommand(cmd, debug)
 
+################################################################################
+
+# Originally created by Qiuwen "Owen" Fan and Ben Owad
 def trim(id, start, end, debug):
     format = config.videoFormat
     inPath = os.path.join(config.fullVideoDir, f'{id}.{format}')
@@ -83,10 +95,14 @@ def trim(id, start, end, debug):
         return True
 
     w, h = config.width, config.height
-    cmd = (f'ffmpeg -ss {start} -to {end} -i {inPath} -r 30 -an '
+    # trims and scales to appropriate dimensions
+    cmd = (f'ffmpeg -ss {start} -to {end} -i {inPath} -r {config.fps} -an '
            f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}')
     return runCommand(cmd, debug)
 
+################################################################################
+
+# Created by jxgong
 def createFrame(id, title, debug):
     title = title.lower()
     dragon = Image.open(os.path.join(config.assetDir, 'dragon.png'))
@@ -115,6 +131,8 @@ def createFrame(id, title, debug):
     im.save(outPath, config.imageFormat)
     return True
 
+################################################################################
+
 def overlay(id, debug):
     imgFormat = config.imageFormat
     vidFormat = config.videoFormat
@@ -130,3 +148,5 @@ def overlay(id, debug):
     cmd = (f'ffmpeg -i {clipPath} -i {framePath} '
            f'-filter_complex [0][1]overlay=x=0:y=0 {outPath}')
     return runCommand(cmd, debug)
+
+################################################################################
