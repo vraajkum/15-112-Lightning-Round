@@ -1,11 +1,13 @@
-import subprocess
+import os, subprocess
 
-def mmssToSeconds(s):
-    seconds = 0
-    for num in s.split(":"):
-        seconds *= 60
-        seconds += int(num)
-    return seconds
+def printLine():
+    terminalSize = os.get_terminal_size().columns
+    print('-' * terminalSize)
+
+def printHeader(text):
+    printLine()
+    print(text)
+    printLine()
 
 def runCommand(command, debug):
     try:

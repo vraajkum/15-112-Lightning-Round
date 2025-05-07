@@ -1,5 +1,5 @@
 import config
-from utils import mmssToSeconds, runCommand
+from utils import runCommand
 import os, csv, sys
 from PIL import Image, ImageDraw, ImageFont
 
@@ -18,12 +18,6 @@ def createClips(csvPath, debug):
 def processID(info, failureInfo, debug):
     id, title, url, start, end = info
     print(f'ID: {id}')
-
-    vidFormat = config.videoFormat
-    outPath = os.path.join(config.overlaidVideoDir, f'{id}.{vidFormat}')
-    if os.path.isfile(outPath):
-        print('Overlaid file found')
-        return
 
     print('Downloading...\t\t', end='', flush=True)
     if download(id, url, debug):
@@ -89,9 +83,8 @@ def trim(id, start, end, debug):
         return True
 
     w, h = config.width, config.height
-    cmd = f'ffmpeg -ss {start} -to {end} -i {inPath} -r 30 -an '
-    cmd += f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}'
-    
+    cmd = (f'ffmpeg -ss {start} -to {end} -i {inPath} -r 30 -an '
+           f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}')
     return runCommand(cmd, debug)
 
 def createFrame(id, title, debug):
@@ -108,7 +101,7 @@ def createFrame(id, title, debug):
     width = draw.textlength(title, font=font)
     if width > maxWidth:
         if debug:
-            print(f'''"{title}" is too long, frame not created.''')
+            print(f"'{title}' is too long, frame not created.")
         return False
     draw.rectangle([0, 800, 150+width+50, 930], fill = "white",
                    outline = (0,0,0,0), width = 0)
@@ -134,7 +127,6 @@ def overlay(id, debug):
     if not os.path.isfile(framePath) or not os.path.isfile(clipPath):
         return False
 
-    cmd = f'ffmpeg -i {clipPath} -i {framePath} '
-    cmd += f'-filter_complex [0][1]overlay=x=0:y=0 {outPath}'
-
+    cmd = (f'ffmpeg -i {clipPath} -i {framePath} '
+           f'-filter_complex [0][1]overlay=x=0:y=0 {outPath}')
     return runCommand(cmd, debug)

@@ -16,27 +16,23 @@ vraajkum,coolTP,https://www.youtube.com/watch?v=dQw4w9WgXcQ,1:12,1:16
 '''
 
 import config
+from utils import printLine, printHeader
 from clips import createClips
 from video import makeVideo
-import argparse, os, csv
+import argparse, os
 
 def main(csvPath, debug):
-    terminalSize = os.get_terminal_size().columns
     createMissingDirs()
 
-    print('-' * terminalSize)
-    print('Creating Clips')
-    print(('-' * terminalSize) + '\n')
+    printHeader('Creating Clips')
     clipSuccess = createClips(csvPath, debug)
 
-    print('-' * terminalSize)
-    print('Creating Video')
-    print(('-' * terminalSize) + '\n')
-    if not clipSuccess:
+    printHeader('Creating Video')
+    if clipSuccess:
+        makeVideo(debug)
+    else:
         print('Not all clips created, exiting')
-        return
-    makeVideo(debug)
-    print('-' * terminalSize)
+    printLine()
 
 def createMissingDirs():
     dirs = [config.fullVideoDir, config.trimmedVideoDir, config.frameDir,

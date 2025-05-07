@@ -4,12 +4,31 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 def makeVideo(debug):
-    createTitle()
-    makeTitleClip(debug)
-    combineClips(debug)
-    addMusic(debug)
+    print('Creating Title Image...\t', end='', flush=True)
+    createTitleImage()
+    print('Succeeded')
 
-def createTitle():
+    print('Making Title Clip...\t', end='', flush=True)
+    if makeTitleClip(debug):
+        print('Succeeded')
+    else:
+        print('Failed')
+        return
+    
+    print('Combining Clips...\t', end='', flush=True)
+    if combineClips(debug):
+        print('Succeeded')
+    else:
+        print('Failed')
+        return
+    
+    print('Adding Music...\t\t', end='', flush=True)
+    if addMusic(debug):
+        print('Succeeded')
+    else:
+        print('Failed')
+
+def createTitleImage():
     bgPath = os.path.join(config.assetDir, 'title-bg.png')
     outPath = os.path.join(config.finalDir, f'title.{config.imageFormat}')
     if os.path.exists(outPath):
@@ -29,11 +48,25 @@ def createTitle():
 def makeTitleClip(debug):
     inPath = os.path.join(config.finalDir, f'title.{config.imageFormat}')
     outPath = os.path.join(config.finalDir, f'title.{config.videoFormat}')
+    if not os.path.exists(inPath):
+        return False
     if os.path.exists(outPath):
-        return
+        return True
     
-    cmd = f'ffmpeg -i {inPath} -r 30 -t 3 -pix_fmt yuv420p -vf loop=-1:1 {outPath}'
-    runCommand(cmd, debug)
+    cmd = (f'ffmpeg -i {inPath} -r 30 -t 3 '
+           f'-pix_fmt yuv420p -vf loop=-1:1 {outPath}')
+    return runCommand(cmd, debug)
+
+def combineClips(debug):
+    textPath = os.path.join(config.finalDir, f'clipList.txt')
+    makeClipList()
+
+    outPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
+    if os.path.exists(outPath):
+        return True
+
+    cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -r 30 -c copy {outPath}'
+    return runCommand(cmd, debug)
 
 def makeClipList():
     textPath = os.path.join(config.finalDir, f'clipList.txt')
@@ -45,20 +78,16 @@ def makeClipList():
             relativePath = os.path.relpath(path, config.finalDir)
             f.write(f"file '{relativePath}'\n")
 
-def combineClips(debug):
-    textPath = os.path.join(config.finalDir, f'clipList.txt')
-    outPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
-    makeClipList()
-
-    cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -r 30 -c copy {outPath}'
-    runCommand(cmd, debug)
-
 def addMusic(debug):
     musicPath = os.path.join(config.assetDir, f'music.mp3')
     inPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
     outPath = os.path.join(config.finalDir, f'video.{config.videoFormat}')
+    if not os.path.exists(inPath):
+        return False
+    if os.path.exists(outPath):
+        return True
 
-    cmd = f'ffmpeg -i {inPath} -stream_loop -1 -i {musicPath} '
-    cmd += f'-shortest {outPath}'
-    runCommand(cmd, debug)
-    
+    cmd = (f'ffmpeg -i {inPath} '
+           f'-stream_loop -1 -i {musicPath} '
+           f'-shortest {outPath}')
+    return runCommand(cmd, debug)
