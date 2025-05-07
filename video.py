@@ -7,6 +7,7 @@ def makeVideo(debug):
     createTitle()
     makeTitleClip(debug)
     combineClips(debug)
+    addMusic(debug)
 
 def createTitle():
     bgPath = os.path.join(config.assetDir, 'title-bg.png')
@@ -31,7 +32,6 @@ def makeTitleClip(debug):
     if os.path.exists(outPath):
         return
     
-    w, h, = config.width, config.height
     cmd = f'ffmpeg -i {inPath} -r 30 -t 3 -pix_fmt yuv420p -vf loop=-1:1 {outPath}'
     runCommand(cmd, debug)
 
@@ -47,11 +47,18 @@ def makeClipList():
 
 def combineClips(debug):
     textPath = os.path.join(config.finalDir, f'clipList.txt')
+    outPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
     makeClipList()
 
-    musicPath = os.path.join(config.assetDir, f'Elektronomia - Energy.mp3')
-    outPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
-    cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -r 30 {outPath}'
+    cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -r 30 -c copy {outPath}'
     runCommand(cmd, debug)
 
+def addMusic(debug):
+    musicPath = os.path.join(config.assetDir, f'music.mp3')
+    inPath = os.path.join(config.finalDir, f'combined.{config.videoFormat}')
+    outPath = os.path.join(config.finalDir, f'video.{config.videoFormat}')
+
+    cmd = f'ffmpeg -i {inPath} -stream_loop -1 -i {musicPath} '
+    cmd += f'-shortest {outPath}'
+    runCommand(cmd, debug)
     
