@@ -25,7 +25,7 @@ def processID(info, failureInfo, debug):
         print('Overlaid file found')
         return
 
-    print('Downloading... ', end='', flush=True)
+    print('Downloading...\t\t', end='', flush=True)
     if download(id, url, debug):
         print('Succeeded')
     else:
@@ -33,7 +33,7 @@ def processID(info, failureInfo, debug):
         failureInfo['Download'] = failureInfo.get('Download', []) + [id]
         return
 
-    print('Trimming... ', end='', flush=True)
+    print('Trimming...\t\t', end='', flush=True)
     if trim(id, start, end, debug):
         print('Succeeded')
     else:
@@ -41,7 +41,7 @@ def processID(info, failureInfo, debug):
         failureInfo['Trim'] = failureInfo.get('Trim', []) + [id]
         return
 
-    print('Creating frame... ', end='', flush=True)
+    print('Creating frame...\t', end='', flush=True)
     if createFrame(id, title, debug):
         print('Succeeded')
     else:
@@ -49,7 +49,7 @@ def processID(info, failureInfo, debug):
         failureInfo['Frame'] = failureInfo.get('Frame', []) + [id]
         return
 
-    print('Overlaying... ', end='', flush=True)
+    print('Overlaying...\t\t', end='', flush=True)
     if overlay(id, debug):
         print('Succeeded')
     else:
@@ -89,7 +89,7 @@ def trim(id, start, end, debug):
         return True
 
     w, h = config.width, config.height
-    cmd = f'ffmpeg -an -ss {start} -to {end} -i {inPath} '
+    cmd = f'ffmpeg -ss {start} -to {end} -i {inPath} -r 30 -an '
     cmd += f'-vf scale={w}:{h},pad={w}:{h}:(ow-iw)/2:(oh-ih)/2 {outPath}'
     
     return runCommand(cmd, debug)

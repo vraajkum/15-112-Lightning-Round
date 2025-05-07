@@ -31,7 +31,7 @@ def makeTitleClip(debug):
     if os.path.exists(outPath):
         return
     
-    cmd = f'ffmpeg -i {inPath} -t 3 -vf loop=-1:1 {outPath}'
+    cmd = f'ffmpeg -i {inPath} -r 30 -t 3 -vf loop=-1:1 {outPath}'
     runCommand(cmd, debug)
 
 def makeClipList():
@@ -50,7 +50,7 @@ def combineClips(debug):
 
     musicPath = os.path.join(config.assetDir, f'Elektronomia - Energy.mp3')
     outPath = os.path.join(config.finalDir, f'video.{config.videoFormat}')
-    cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -c copy {outPath}'
+    cmd = f'ffmpeg -f concat -safe 0 -i {textPath} -r 30 {outPath}'
     runCommand(cmd, debug)
 
     
