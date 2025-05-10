@@ -1,4 +1,6 @@
 # 15-112 Lightning Round Script
+Written by Vishant Raajkumar
+
 This GitHub repository contains the files to make the Lighting Round video for 15-112 at CMU.
 
 ## About
