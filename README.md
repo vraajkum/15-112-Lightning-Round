@@ -7,12 +7,12 @@ Prior to this, we used multiple different scripts and we had many issues with ge
 Therefore, I decided to combine the multiple scripts and update the code to be easier to understand.
 
 The script takes in a CSV file with the project information and outputs the following for each project:
-- the full project video
-- the trimmed clip
-- a frame photo with the project name
-- the clip overlaid with the frame
+- the full project video (in the `full` folder)
+- the trimmed clip (in the `trimmed` folder)
+- a frame photo with the project name (in the `frames` folder)
+- the clip overlaid with the frame (in the `overlaid` folder)
 
-It also outputs the following:
+It also outputs the following to the `final` folder:
 - the title photo and clip
 - all clips combined without music
 - all clips combined with music
@@ -33,6 +33,7 @@ Lastly, you'll need to install ffmpeg.
 The installation depends on the platform:
 - Windows - Download the file "ffmpeg-git-full.7z" from [this link](https://www.gyan.dev/ffmpeg/builds/) and unzip
 - Mac - Enter the command `brew install ffmpeg` in the terminal or download from [this link](https://evermeet.cx/ffmpeg/) and unzip
+
 If you manually install ffmpeg, add the folder containing the ffmpeg executable to your PATH variable (if stuck, [here's](https://www.java.com/en/download/help/path.html) a good resource).
 
 ## Usage
@@ -110,7 +111,7 @@ If any future TAs want to contribute to this project, then you can fork the repo
 
 One feature that I'd love to implement but am too lazy to figure out how to implement is a CSV validation script that makes sure everything is properly inputted.
 
-If you need any assistance or want to let me know about any cool features you've implemented, you can contact me at vraajkum@andrew.cmu.edu and/or veekant@gmail.com.
+If you need any assistance, have any questions, or want to let me know about any cool features you've implemented, you can contact me at vraajkum@andrew.cmu.edu and/or veekant@gmail.com.
 
 ## Credits
 The portion of the script for downloading and trimming the clips was orignally written by Qiuwen "Owen" Fan and later ported to Python 3 by Ben Owad.
