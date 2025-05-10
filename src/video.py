@@ -48,7 +48,7 @@ def createTitleImage():
     
     im = Image.open(bgPath).copy()
     draw = ImageDraw.Draw(im, 'RGBA')
-    draw.text((2210, 800), config.currSem, font=font, fill=color)
+    draw.text((2180, 800), config.currSem, font=font, fill=color)
     im = im.resize((config.width, config.height))
 
     im.save(outPath, config.imageFormat)

@@ -70,7 +70,7 @@ def displayFailureInfo(failureInfo):
 
 ################################################################################
 
-# Created by Qiuwen "Owen" Fan and Ben Owad
+# Originally written by Qiuwen "Owen" Fan and ported to Python 3 by Ben Owad
 def download(id, url, debug):
     format = config.videoFormat
     outPath = os.path.join(config.fullVideoDir, f'{id}.{format}')
@@ -84,7 +84,7 @@ def download(id, url, debug):
 
 ################################################################################
 
-# Originally created by Qiuwen "Owen" Fan and Ben Owad
+# Originally written by Qiuwen "Owen" Fan and ported to Python 3 by Ben Owad
 def trim(id, start, end, debug):
     format = config.videoFormat
     inPath = os.path.join(config.fullVideoDir, f'{id}.{format}')
@@ -102,7 +102,7 @@ def trim(id, start, end, debug):
 
 ################################################################################
 
-# Created by jxgong
+# Originally written by Jason Gong
 def createFrame(id, title, debug):
     title = title.lower()
     dragon = Image.open(os.path.join(config.assetDir, 'dragon.png'))
